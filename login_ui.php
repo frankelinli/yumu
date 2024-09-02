@@ -1,6 +1,6 @@
 <?php
 
-// WordPress后台登录页面美化
+// WordPress后台登录页面美化。很好。带尝试。
 function custom_login_style() {
     $bgimgj = get_template_directory_uri().'/style/img/th.jpeg';
     echo '
