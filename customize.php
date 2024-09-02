@@ -17,7 +17,7 @@ function key_Desc($type){
 }
 //上面的自定义SEO关键字和描述请勿删除，下面的随便删，但不建议。
 
-//哎，操碎了心～
+
 
 //隐藏wordpress后台登录地址，防止一下子就被人猜到，默认注释，需要请自己删除注释，建议开启安全性。
 // add_action('login_enqueue_scripts','login_protection');  
