@@ -1,47 +1,32 @@
 <?php
 
-add_action('save_post', function($post_id, $post, $update) {
-    // 检查是否是新文章，而不是更新
-    if (!$update) {
-        // 确保不是自动保存
-        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
-            return;
-        }
-        
-        // 检查文章类型（这里我们只处理 'post' 类型）
-        if ('post' !== $post->post_type) {
-            return;
-        }
-        
-        // 添加自定义字段
-        $creation_date = current_time('mysql');
-        update_post_meta($post_id, 'creation_date', $creation_date);
-        
-        // 获取文章标题
-        $post_title = get_the_title($post_id);
-        
-        // 获取管理员邮箱
-        $admin_email = get_option('admin_email');
-        
-        // 邮件主题
-        $subject = '新文章已创建：' . $post_title;
-        
-        // 邮件内容
-        $message = "一篇新文章已经创建：\n\n";
-        $message .= "标题: $post_title\n";
-        $message .= "创建日期: $creation_date\n";
-        $message .= "编辑链接: " . get_edit_post_link($post_id, '');
-        
-        // 发送邮件
-        wp_mail($admin_email, $subject, $message);
-        
-        // 可选：记录日志
-        error_log("新文章创建：ID $post_id, 标题 '$post_title'");
+
+
+
+// 添加阅读时间元数据
+function add_reading_time_meta($post_id) {
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
     }
-}, 10, 3);
 
+    // 检查用户权限
+    if (!current_user_can('edit_post', $post_id)) {
+        return;
+    }
 
+    $meta_key = 'reading_time';
+    
+    // 假设每分钟阅读200个字
+    $content = get_post_field('post_content', $post_id);
+    $word_count = str_word_count(strip_tags($content));
+    $reading_time = ceil($word_count / 200);
 
+    // 添加或更新阅读时间元数据
+    if (!add_post_meta($post_id, $meta_key, $reading_time, true)) {
+        update_post_meta($post_id, $meta_key, $reading_time);
+    }
+}
+add_action('save_post', 'add_reading_time_meta');
 
 
 
@@ -204,7 +189,7 @@ add_filter('rest_api_init','rest_only_for_authorized_users',99);
 remove_filter('wp_robots','wp_robots_max_image_preview_large');
 
 //禁止前台展示工具条
-add_filter('show_admin_bar', '__return_false');
+// add_filter('show_admin_bar', '__return_false');
 
 //屏蔽找回密码，好好记牢密码，真的忘记了再来注释掉
 add_filter('allow_password_reset','__return_false');
