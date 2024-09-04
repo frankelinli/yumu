@@ -1,8 +1,6 @@
 <?php
 
 
-
-
 // 添加阅读时间元数据
 function add_reading_time_meta($post_id) {
     if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
