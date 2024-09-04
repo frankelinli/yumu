@@ -1,5 +1,50 @@
 <?php
 
+add_action('save_post', function($post_id, $post, $update) {
+    // 检查是否是新文章，而不是更新
+    if (!$update) {
+        // 确保不是自动保存
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+            return;
+        }
+        
+        // 检查文章类型（这里我们只处理 'post' 类型）
+        if ('post' !== $post->post_type) {
+            return;
+        }
+        
+        // 添加自定义字段
+        $creation_date = current_time('mysql');
+        update_post_meta($post_id, 'creation_date', $creation_date);
+        
+        // 获取文章标题
+        $post_title = get_the_title($post_id);
+        
+        // 获取管理员邮箱
+        $admin_email = get_option('admin_email');
+        
+        // 邮件主题
+        $subject = '新文章已创建：' . $post_title;
+        
+        // 邮件内容
+        $message = "一篇新文章已经创建：\n\n";
+        $message .= "标题: $post_title\n";
+        $message .= "创建日期: $creation_date\n";
+        $message .= "编辑链接: " . get_edit_post_link($post_id, '');
+        
+        // 发送邮件
+        wp_mail($admin_email, $subject, $message);
+        
+        // 可选：记录日志
+        error_log("新文章创建：ID $post_id, 标题 '$post_title'");
+    }
+}, 10, 3);
+
+
+
+
+
+
 //这是一个后台登录页面的美化，你要是嫌弃就删掉，我懒得管你。
 include_once TEMPLATEPATH.'/login_ui.php';
 
